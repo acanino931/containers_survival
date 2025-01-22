@@ -1,0 +1,35 @@
+# Ignore the virtual environment folder
+myenv/
+venv/
+env/
+.venv/
+
+# Ignore Python bytecode files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore log files
+*.log
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore configuration files for IDEs/editors
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Ignore the Streamlit configuration folder
+.streamlit/
+
+# Ignore environment files (if you’re using a different environment manager)
+*.env
+
+# Ignore dependencies
+*.lock
+*.db
+
+# Ignore cache files
+.cache/
+
