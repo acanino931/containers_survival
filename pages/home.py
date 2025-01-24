@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from components.DataSimulator import DataSimulator
+from DataSimulator import DataSimulator
 st.title("Container Data Simulation")
 
 st.markdown("""

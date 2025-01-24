@@ -73,6 +73,6 @@ def get_lognorm_PDF(df, duration, scaling_factor = 10):
     return closest_row["PDF"] * scaling_factor
     
 
-dist = get_lognorm_distribution()
-res = get_lognorm_PDF(dist,0)
-print (res)
+#dist = get_lognorm_distribution()
+#res = get_lognorm_PDF(dist,0)
+#print (res)

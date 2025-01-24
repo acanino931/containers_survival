@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+from utils import math_functions
 
 class DataSimulator:
     """
@@ -8,7 +9,7 @@ class DataSimulator:
     whether they are lost, and calculating the total stock of non-lost containers.
     """
 
-    def __init__(self, num_containers, days, min_recollect_offset, max_trip_days, recollecting_rate=0.1, start_date="2023-01-01"):
+    def __init__(self, num_containers, days, min_recollect_offset, max_trip_days, recollecting_rate=0.1, scenario = 1, start_date="2023-01-01"):
         """
         Initializes the simulation parameters.
 
@@ -26,6 +27,7 @@ class DataSimulator:
         self.max_trip_days = max_trip_days
         self.recollecting_rate = recollecting_rate
         self.start_date = start_date
+        self.scenario = scenario
 
     def update_fake_lost(self, df):
         """
@@ -63,6 +65,15 @@ class DataSimulator:
         start_date = datetime.strptime(self.start_date, "%Y-%m-%d")
         actual_dates = [start_date + timedelta(days=i) for i in range(self.days)]
         np.random.seed(42)
+        # for the main scenario we are using the default parameters of the log normal
+        # distribution in order to model the recollecting probability.
+        if self.scenario == 1:
+            log_norm_dist =    math_functions.get_lognorm_distribution()
+        else:
+            # TODO modify the lognorm distribution params fro scenario 2 
+            pass
+        
+
 
         # Initialize the dataframe
         data = []
@@ -88,34 +99,23 @@ class DataSimulator:
                         trip_number = None
                 else:
                     if recollecting_date is None:  # Check for a recollecting date
-                        if actual_date >= starting_date + timedelta(days=self.min_recollect_offset):
-                            if actual_date <= starting_date + timedelta(days=self.max_trip_days):
-                                if np.random.rand() < self.recollecting_rate:
-                                    recollecting_date = actual_date
-                                    is_lost = 0
-                                    # Ensure the final values are written on the row with the recollecting date
-                                    data.append({
-                                        "ContainerID": container_id,
-                                        "ActualDate": actual_date,
-                                        "StartingDate": starting_date,
-                                        "RecollectingDate": recollecting_date,
-                                        "isLost": is_lost,
-                                        "DayTrip": day_trip,
-                                        "TripID": trip_number,
-                                        "IsFakeLost": 0  # Will be updated later if needed
-                                    })
-                                    starting_date = None
-                                    recollecting_date = None
-                                    is_lost = 0
-                                    day_trip = None
-                                    trip_number = None
-                                    continue
-                            else:  # After max_trip_days, allow recollecting but keep is_lost = 1 
-                                if np.random.rand() < self.recollecting_rate/(10 + (50 - 10) * np.random.rand()):
-                                    #original recollecting the probability is divided for a nuber in between 10 and 50 to simula
-                                    recollecting_date = actual_date
-                        if actual_date > starting_date + timedelta(days=self.max_trip_days):
-                            is_lost = 1  # Mark as lost after max_trip_days if not recollected
+                        #print(f"get_lognorm_PDF : {math_functions.get_lognorm_PDF(log_norm_dist, day_trip)}")
+                        
+                        if np.random.rand() < math_functions.get_lognorm_PDF(log_norm_dist, day_trip, scaling_factor =1 ):
+                            recollecting_date = actual_date
+                            is_lost = 0
+                            starting_date = None
+                            recollecting_date = None
+                            is_lost = 0
+                            day_trip = None
+                            trip_number = None
+
+                        else:
+                            
+                                
+                            if actual_date > starting_date + timedelta(days=self.max_trip_days):
+                                is_lost = 1  # Mark as lost after max_trip_days if not recollected
+
                         if day_trip is not None:
                             day_trip += 1  # Increment day_trip for each day in trip
 
