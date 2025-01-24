@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from utils import math_functions
 
 class DataTransformer:
     """
@@ -38,35 +39,46 @@ class DataTransformer:
 
     
     def create_summary_table(self):
-            """
-            Creates a summary table with the average percentage of days containers are in a trip
-            and the percentage of incorrectly classified lost days.
+        """
+        Creates a summary table with the average percentage of days containers are in a trip,
+        the percentage of incorrectly classified lost days, and additional metrics.
 
-            Returns:
-                pd.DataFrame: A summary DataFrame with KPIs.
-            """
-            # Calculate the percentage of rows where Starting Date is not null
-            total_rows = len(self.df)
-            days_in_trip = self.df["StartingDate"].notnull().sum()
-            average_days_in_SC = days_in_trip / total_rows
+        Returns:
+            pd.DataFrame: A summary DataFrame with KPIs.
+        """
+        # Calculate the percentage of rows where StartingDate is not null
+        total_rows = len(self.df)
+        days_in_trip = self.df["StartingDate"].notnull().sum()
+        average_days_in_SC = days_in_trip / total_rows
 
-            # Calculate the percentage of incorrectly classified lost days
-            total_lost = self.df["isLost"].sum()
-            fake_lost = self.df["IsFakeLost"].sum()
-            percentage_fake_lost = fake_lost / total_lost if total_lost > 0 else 0
+        # Calculate the percentage of incorrectly classified lost days
+        total_lost = self.df["isLost"].sum()
+        fake_lost = self.df["IsFakeLost"].sum()
+        percentage_fake_lost = fake_lost / total_lost if total_lost > 0 else 0
 
-            # add the avg days of trips when not lost, avg days of trips when lost
+        # Group by ContainerID and TripID and calculate metrics
+        groupby_trip = self.df[self.df["RecollectingDate"].notnull()].groupby(["ContainerID", "TripID"])
+        day_trip_max = groupby_trip["DayTrip"].max()
+        print (f"type day_trip_max:{type(day_trip_max)}")
+        print (f"type day_trip_max:{day_trip_max}")
 
-            # calculate the estimated number of available containers
+        # Calculate average and variance of DayTrip
+        avg_days_trip_not_lost = day_trip_max.mean()
+        var_days_trip_not_lost = day_trip_max.var()
 
-            # avg trips for container
-            # Create summary table with KPIs
-            summary = pd.DataFrame({
-                "Average Days in SC": [average_days_in_SC],
-                "Percentage Fake Lost": [percentage_fake_lost]
-            })
+        # Calculate the exponential threshold
+        threshold = math_functions.calculate_exponential_threshold(day_trip_max)
 
-            return summary
+        # Create summary table with KPIs
+        summary = pd.DataFrame({
+            "Average Days in SC": [average_days_in_SC],
+            "Percentage Fake Lost": [percentage_fake_lost],
+            "Average Days in Trip (Not Lost)": [avg_days_trip_not_lost],
+            "Variance of Days in Trip (Not Lost)": [var_days_trip_not_lost],
+            "Exponential Threshold": [threshold]
+        })
+
+        return summary
     
     def prepare_data_for_kaplan_meier(self):
         model_df =  self.reassign_lost_value()

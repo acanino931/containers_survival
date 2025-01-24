@@ -62,6 +62,7 @@ class DataSimulator:
         # Define the starting date for the simulation
         start_date = datetime.strptime(self.start_date, "%Y-%m-%d")
         actual_dates = [start_date + timedelta(days=i) for i in range(self.days)]
+        np.random.seed(42)
 
         # Initialize the dataframe
         data = []
@@ -109,8 +110,9 @@ class DataSimulator:
                                     day_trip = None
                                     trip_number = None
                                     continue
-                            else:  # After max_trip_days, allow recollecting but keep is_lost = 1
-                                if np.random.rand() < self.recollecting_rate/10:
+                            else:  # After max_trip_days, allow recollecting but keep is_lost = 1 
+                                if np.random.rand() < self.recollecting_rate/(10 + (50 - 10) * np.random.rand()):
+                                    #original recollecting the probability is divided for a nuber in between 10 and 50 to simula
                                     recollecting_date = actual_date
                         if actual_date > starting_date + timedelta(days=self.max_trip_days):
                             is_lost = 1  # Mark as lost after max_trip_days if not recollected

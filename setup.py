@@ -7,7 +7,9 @@ setup(
     install_requires=[
         'pandas',
         'streamlit',
-        'openpyxl'
+        'openpyxl',
+        'scipy',
+        'plotly'
     ],
     entry_points={
         'console_scripts': [
