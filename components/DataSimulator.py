@@ -9,23 +9,19 @@ class DataSimulator:
     whether they are lost, and calculating the total stock of non-lost containers.
     """
 
-    def __init__(self, num_containers, days, min_recollect_offset, max_trip_days, recollecting_rate=0.1, scenario = 1, start_date="2023-01-01"):
+    def __init__(self, num_containers, days, max_trip_days, scenario = 1, start_date="2023-01-01"):
         """
         Initializes the simulation parameters.
 
         Args:
             num_containers (int): Number of containers to simulate.
             days (int): Number of days to simulate from the start date.
-            min_recollect_offset (int): Minimum days after starting date to allow recollection.
             max_trip_days (int): Maximum days for a container to be considered not lost.
-            recollecting_rate (float): Probability of recovering a container in each day within the allowed time span (from the start_date + min_recollect_offset to start_date + max_trip_days).
             start_date (str): Default start date value for simulated data.
         """
         self.num_containers = num_containers
         self.days = days
-        self.min_recollect_offset = min_recollect_offset
         self.max_trip_days = max_trip_days
-        self.recollecting_rate = recollecting_rate
         self.start_date = start_date
         self.scenario = scenario
 
@@ -101,18 +97,12 @@ class DataSimulator:
                     if recollecting_date is None:  # Check for a recollecting date
                         #print(f"get_lognorm_PDF : {math_functions.get_lognorm_PDF(log_norm_dist, day_trip)}")
                         
-                        if np.random.rand() < math_functions.get_lognorm_PDF(log_norm_dist, day_trip, scaling_factor =1 ):
+                        if np.random.rand() < math_functions.get_lognorm_PDF(log_norm_dist, day_trip, scaling_factor = 5 ):
+                            #print("recollection")
                             recollecting_date = actual_date
-                            is_lost = 0
-                            starting_date = None
-                            recollecting_date = None
-                            is_lost = 0
-                            day_trip = None
-                            trip_number = None
 
                         else:
                             
-                                
                             if actual_date > starting_date + timedelta(days=self.max_trip_days):
                                 is_lost = 1  # Mark as lost after max_trip_days if not recollected
 
@@ -155,9 +145,7 @@ if __name__ == "__main__":
     simulator = DataSimulator(
         num_containers=1000,
         days=100,
-        min_recollect_offset=15,
         max_trip_days=40,
-        recollecting_rate= 0.1
     )
     df = simulator.simulate_container_data()
     df.to_excel("./data/survival_data.xlsx", index=False)

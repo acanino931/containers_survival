@@ -9,7 +9,8 @@ setup(
         'streamlit',
         'openpyxl',
         'scipy',
-        'plotly'
+        'plotly',
+        'lifelines'
     ],
     entry_points={
         'console_scripts': [

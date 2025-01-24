@@ -22,7 +22,7 @@ def calculate_exponential_threshold( data, confidence=0.95):
 
 
 
-def get_lognorm_distribution(mean= 3.5 , sigma = 0.35 ):
+def get_lognorm_distribution(mean= 3.5 , sigma = 0.3 ):
 
     """
     Function that return the lognorm distrinution parameters
@@ -37,7 +37,7 @@ def get_lognorm_distribution(mean= 3.5 , sigma = 0.35 ):
 
     # List of duration values greater than the threshold
     x = np.linspace(1, 300, 300) 
-    print (x)
+    #print (x)
 
     pdf_values = log_normal_dist.pdf(x)
     cdf_values = log_normal_dist.cdf(x)
@@ -50,7 +50,7 @@ def get_lognorm_distribution(mean= 3.5 , sigma = 0.35 ):
     })
     return data
 
-def get_lognorm_PDF(df, duration, scaling_factor = 10):
+def get_lognorm_PDF(df, duration, scaling_factor = 5):
     """
     Returns the Probability Density Function (PDF) value for a given duration by looking up a DataFrame.
     If the duration does not exist in the DataFrame, it finds the closest duration value.
@@ -76,3 +76,29 @@ def get_lognorm_PDF(df, duration, scaling_factor = 10):
 #dist = get_lognorm_distribution()
 #res = get_lognorm_PDF(dist,0)
 #print (res)
+
+
+def calculate_upper_bound(series , k = 3):
+    """
+    Calculates the upper bound for detecting outliers using the Interquartile Range (IQR).
+    Used because it is a robust measure.
+    the k parameter it's setted to 3 instead of the default Tukey value 1,5 beacuse of the skewness of the log normal distribution
+
+    Parameters:
+        data (pd.DataFrame): The input DataFrame.
+        column (str): The column name to calculate the upper bound.
+
+    Returns:
+        float: The upper bound for detecting outliers.
+    """
+    # Calculate Q1 and Q3
+    Q1 = series.quantile(0.25)
+    Q3 = series.quantile(0.75)
+
+    # Calculate IQR
+    IQR = Q3 - Q1
+
+    # Calculate the upper bound
+    upper_bound = Q3 + k * IQR
+
+    return round(upper_bound)
