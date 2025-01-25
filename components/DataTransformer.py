@@ -87,33 +87,11 @@ class DataTransformer:
 
         return summary , day_trip_all
     
-    def prepare_data_for_kaplan_meier(self):
-        # reassign the missclassified lost values in order to have clean data for the training.
-        data = self.reassign_lost_value()
-        # creating a unique id that consider the event trip:
-    
-        data["UniqueTripID"] = data["ContainerID"].astype(str) + "_" + data["TripID"].astype(str)
-        # eliminating all the row when the container is not exposed to risks
-        data = data[data["StartingDate"].notnull()]
-
-        groupby_trip_all = data.groupby(["UniqueTripID"])
-
-        # Calculate the maximum DayTrip for each group
-        day_trip_all = groupby_trip_all["DayTrip"].max()
-
-        # Include the IsLost column by aggregating with max (1 = lost, 0 = not lost)
-        is_lost_all = groupby_trip_all["IsLost"].max()
-
-        # Combine into a single DataFrame
-        result = pd.DataFrame({
-            "DayTrip": day_trip_all,
-            "IsLost": is_lost_all
-        }).reset_index()
 
         #self.model_data = result
-        result.to_excel("./data/model_data.xlsx", index=False)
+        #result.to_excel("./data/model_data.xlsx", index=False)
 
-        return result
+        #return result
     
 
     

@@ -1,30 +1,36 @@
 import streamlit as st
-import pandas as pd
-import logging
 
-# Set up logging configuration
-logging.basicConfig(
-    filename='app.log',  # Log file name
-    level=logging.DEBUG,  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
-    format='%(asctime)s - %(levelname)s - %(message)s'
+# Configure the page layout to remove the sidebar
+st.set_page_config(
+    page_title="IFCO Data science Challenge App",
+    page_icon="📦",
+    layout="centered",  # Center all content on the main page
 )
 
-# Example log messages
-logging.info("Streamlit app started.")
+# App Title
+st.title("Welcome to the IFCO Data science challenge App")
 
-# Title for the app
-st.title("Streamlit Application")
+st.markdown("""
+### Select a Page
+Choose the action you'd like to perform below:
+""")
 
-# Upload file functionality
-uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+# Centered Navigation
+page = st.selectbox(
+    "Navigate to:",
+    options=["Data Generation Scenario1", "Data Generation Scenario2", "Launch the Model"],
+    index=0
+)
 
-if uploaded_file:
-    # Log file upload event
-    logging.info(f"User uploaded a file: {uploaded_file.name}")
-    
-    # Read and display the file
-    df = pd.read_csv(uploaded_file)
-    st.write(df)
-    
-    # Log data shape
-    logging.info(f"Data contains {df.shape[0]} rows and {df.shape[1]} columns.")
+# Page Navigation Logic
+if page == "Data Generation Scenario1":
+    from pages.data_gen import run_data_generation
+    run_data_generation(scenario=1)
+
+elif page == "Data Generation Scenario2":
+    from pages.data_gen import run_data_generation
+    run_data_generation(scenario=2)
+
+elif page == "Launch the Model":
+    from pages.launch_the_model import launch_the_model
+    launch_the_model()

@@ -9,7 +9,7 @@ class DataSimulator:
     whether they are lost, and calculating the total stock of non-lost containers.
     """
 
-    def __init__(self, num_containers, days, max_trip_days, scenario = 1, start_date="2023-01-01"):
+    def __init__(self, num_containers, days, max_trip_days, scenario = 1, perc_trips_observed = 1, start_date="2023-01-01"):
         """
         Initializes the simulation parameters.
 
@@ -24,6 +24,7 @@ class DataSimulator:
         self.max_trip_days = max_trip_days
         self.start_date = start_date
         self.scenario = scenario
+        self.perc_trips_observed = perc_trips_observed
         self.eval_metrics = None
 
     def update_fake_lost(self, df):
@@ -114,11 +115,12 @@ class DataSimulator:
         # for the main scenario we are using the default parameters of the log normal
         # distribution in order to model the recollecting probability.
         if self.scenario == 1:
-            log_norm_dist =    math_functions.get_lognorm_distribution()
+            log_norm_dist =    math_functions.get_lognorm_distribution(mean= 3.5 , sigma = 0.3)
         else:
-            # TODO modify the lognorm distribution params fro scenario 2 
-            pass
-        
+            # the underlying probability distribution in case of the second scenario has a different shape
+            # reflecting that the probability of experimenting a recollecting event it's less concentered around the mean ad it's lagged
+            adjusted_mu ,adjusted_sigma =  math_functions.calculate_adjusted_params(perc_trips_observed = self.perc_trips_observed , mu = 3.5, sigma = 0.3)
+            log_norm_dist =    math_functions.get_lognorm_distribution(mean= adjusted_mu , sigma = adjusted_sigma)
 
 
         # Initialize the dataframe
@@ -131,6 +133,7 @@ class DataSimulator:
             day_trip = None
             trip_number = None
             current_trip = 0
+            scaling_factor = 3
 
             for actual_date in actual_dates:
                 if starting_date is None:  # Start a new trip
@@ -147,7 +150,7 @@ class DataSimulator:
                     if recollecting_date is None:  # Check for a recollecting date
                         #print(f"get_lognorm_PDF : {math_functions.get_lognorm_PDF(log_norm_dist, day_trip)}")
                         
-                        if np.random.rand() < math_functions.get_lognorm_PDF(log_norm_dist, day_trip, scaling_factor = 5 ):
+                        if np.random.rand() < math_functions.get_lognorm_PDF(log_norm_dist, day_trip, scaling_factor = scaling_factor ):
                             #print("recollection")
                             recollecting_date = actual_date
 
@@ -205,7 +208,7 @@ if __name__ == "__main__":
         max_trip_days=40,
     )
     df = simulator.simulate_container_data()
-    df.to_excel("./data/survival_data.xlsx", index=False)
+    #df.to_excel("./data/survival_data.xlsx", index=False)
     #df.to_csv("./data/survival_data.csv", index=False)
 
 

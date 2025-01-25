@@ -14,7 +14,7 @@ def plot_histogram_with_thresholds(series, user_threshold, recommended_threshold
         plotly.graph_objects.Figure: The Plotly figure with the histogram and thresholds.
     """
     # Create the histogram using Plotly Express
-    fig = px.histogram(series, x=series, nbins=30, title="Histogram with Thresholds")
+    fig = px.histogram(series, x=series, nbins=30, title="Histogram Of the duration of trips")
 
     # Add vertical lines for the thresholds
     if user_threshold != recommended_threshold:

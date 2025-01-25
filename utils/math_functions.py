@@ -3,23 +3,6 @@ from scipy.stats import lognorm
 import numpy as np
 import pandas as pd
 
-# Example: Calculate the threshold to isolate the top 5% (95th percentile)
-def calculate_exponential_threshold( data, confidence=0.95):
-        """
-        Calculates the threshold for isolating the top (1 - confidence) cases
-        assuming an exponential distribution.
-
-        Args:
-            data (pd.Series): The data (e.g., DayTrip values) to analyze.
-            confidence (float): The desired confidence level (default is 0.95).
-
-        Returns:
-            float: The calculated threshold.
-        """
-        mean_value = data.mean()  # Calculate the mean of the data
-        threshold = expon.ppf(confidence, scale=mean_value)  # Compute the threshold
-        return threshold
-
 
 
 def get_lognorm_distribution(mean= 3.5 , sigma = 0.3 ):
@@ -102,3 +85,41 @@ def calculate_upper_bound(series , k = 3):
     upper_bound = Q3 + k * IQR
 
     return round(upper_bound)
+
+
+def calculate_adjusted_params(perc_trips_observed, mu, sigma):
+    """
+    Calculate the adjusted mean (mu') and standard deviation (sigma')
+    for a log-normal distribution based on the percentage of observed trips,
+    ensuring the mean of the distribution adjusts dynamically.
+
+    Parameters:
+        perc_trips_observed (float): Percentage of observed trips (0 < perc_trips_observed <= 1).
+        mu (float): Original mean of the natural logarithm of the distribution.
+        sigma (float): Original standard deviation of the natural logarithm of the distribution.
+
+    Returns:
+        tuple: Adjusted mean (mu'), adjusted standard deviation (sigma').
+    """
+    if perc_trips_observed <= 0 or perc_trips_observed > 1:
+        raise ValueError("perc_trips_observed must be in the range (0, 1].")
+
+    # Calculate the current mean of the log-normal distribution
+    current_mean = np.exp(mu + (sigma**2) / 2)
+
+    # Target mean: If perc_trips_observed < 1, the mean should scale accordingly
+    target_mean = current_mean / perc_trips_observed
+
+    # Adjust the mean (mu') to achieve the target mean
+    adjusted_mu = np.log(target_mean) - (sigma**2) / 2
+
+    # Adjust the standard deviation (sigma') to slightly increase variability
+    if perc_trips_observed < 1:
+        adjustment_factor = np.log(1 / perc_trips_observed)  # Scales with reduced observation
+        adjusted_sigma = sigma + 0.1 * adjustment_factor  # Increase dispersion slightly
+    else:
+        adjusted_sigma = sigma
+
+    return adjusted_mu, adjusted_sigma
+
+
