@@ -34,12 +34,12 @@ class DataTransformer:
             """
             df = self.df.copy()
             print(df.columns)
-            df["isLost"] = np.where((self.df["isLost"] == 1) & (self.df["IsFakeLost"] == 1), 0, self.df["isLost"])
+            df["IsLost"] = np.where((self.df["IsLost"] == 1) & (self.df["IsFakeLost"] == 1), 0, self.df["IsLost"])
 
             return df
 
     
-    def create_summary_table(self):
+    def create_summary_table(self, dictionary_metrics):
         """
         Creates a summary table with the average percentage of days containers are in a trip,
         the percentage of incorrectly classified lost days, and additional metrics.
@@ -53,10 +53,6 @@ class DataTransformer:
         days_in_trip = self.df["StartingDate"].notnull().sum()
         perc_days_in_trip = days_in_trip / total_rows
 
-        # Calculate the percentage of incorrectly classified lost days
-        total_lost = self.df["isLost"].sum()
-        fake_lost = self.df["IsFakeLost"].sum()
-        percentage_fake_lost = fake_lost / total_lost if total_lost > 0 else 0
 
         # Group by ContainerID and TripID and calculate metrics
         groupby_trip_not_lost = self.df[self.df["RecollectingDate"].notnull()].groupby(["ContainerID", "TripID"])
@@ -67,8 +63,8 @@ class DataTransformer:
         day_trip_all = groupby_trip_all["DayTrip"].max()
 
 
-        print (f"type day_trip_max:{type(day_trip_max_not_lost)}")
-        print (f"type day_trip_max:{day_trip_max_not_lost}")
+        #print (f"type day_trip_max:{type(day_trip_max_not_lost)}")
+        #print (f"type day_trip_max:{day_trip_max_not_lost}")
         #day_trip_all.to_excel("./data/day_trip_max.xlsx", index=False)
         threshold = math_functions.calculate_upper_bound(day_trip_all)
 
@@ -79,10 +75,11 @@ class DataTransformer:
         # Calculate the exponential threshold
         #threshold = math_functions.calculate_exponential_threshold(day_trip_max)
 
-        # Create summary table with KPIs
+
         summary = pd.DataFrame({
             "Percentage Days in Trip": [perc_days_in_trip],
-            "Percentage Fake Lost": [percentage_fake_lost],
+            "Trip Precision user treshold":dictionary_metrics.get("precision_treshold"),
+            "Trip F1 Score:  user treshold":dictionary_metrics.get("F1_Score_threshold"),
             "Average Days in Trip (Not Lost)": [avg_days_trip_not_lost],
             "Variance of Days in Trip (Not Lost)": [var_days_trip_not_lost],
             "Recommended Threshold": [threshold]

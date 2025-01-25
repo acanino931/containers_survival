@@ -35,7 +35,7 @@ if st.button("Generate Data"):
 
     # Transform and store the summary table in session_state
     st.session_state.transformer = DataTransformer(st.session_state.df)
-    summary_table, day_trip_all = st.session_state.transformer.create_summary_table()
+    summary_table, day_trip_all = st.session_state.transformer.create_summary_table(simulator.eval_metrics)
     st.session_state.summary_table = summary_table
     st.session_state.day_trip_all = day_trip_all
     st.session_state.recommended_threshold = summary_table.loc[0, "Recommended Threshold"]
@@ -67,9 +67,9 @@ if "df" in st.session_state:
         )
         st.plotly_chart(fig, use_container_width=True)
 
-    # Use the transformer for the second button
-    if st.button("Launch the Kaplan Meier model"):
-        if "transformer" in st.session_state:
-            a = st.session_state.transformer.prepare_data_for_kaplan_meier()
-        else:
-            st.warning("Please generate data first.")
+    # # Use the transformer for the second button
+    # if st.button("Launch the Kaplan Meier model"):
+    #     if "transformer" in st.session_state:
+    #         a = st.session_state.transformer.prepare_data_for_kaplan_meier()
+    #     else:
+    #         st.warning("Please generate data first.")
