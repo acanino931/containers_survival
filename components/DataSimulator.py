@@ -9,19 +9,19 @@ class DataSimulator:
     whether they are lost, and calculating the total stock of non-lost containers.
     """
 
-    def __init__(self, num_containers, days, max_trip_days, scenario = 1, perc_trips_observed = 1, start_date="2023-01-01"):
+    def __init__(self, num_containers, days, min_trip_days, scenario = 1, perc_trips_observed = 1, start_date="2023-01-01"):
         """
         Initializes the simulation parameters.
 
         Args:
             num_containers (int): Number of containers to simulate.
             days (int): Number of days to simulate from the start date.
-            max_trip_days (int): Maximum days for a container to be considered not lost.
+            min_trip_days (int): Min days expected for each trip.
             start_date (str): Default start date value for simulated data.
         """
         self.num_containers = num_containers
         self.days = days
-        self.max_trip_days = max_trip_days
+        self.min_trip_days = min_trip_days
         self.start_date = start_date
         self.scenario = scenario
         self.perc_trips_observed = perc_trips_observed
@@ -38,7 +38,7 @@ class DataSimulator:
         Returns:
             pd.DataFrame: Updated DataFrame with Is Fake Lost values.
         """
-        # Filter rows where recollecting date appears after max_trip_days
+        # Filter rows where recollecting date appears after min_trip_days
         fake_lost_trips = df[(df["RecollectingDate"].notnull()) & (df["IsLost"] == 1)][["ContainerID", "TripID"]].drop_duplicates()
 
         # Iterate through each misclassified trip
@@ -133,7 +133,7 @@ class DataSimulator:
             day_trip = None
             trip_number = None
             current_trip = 0
-            scaling_factor = 3
+            scaling_factor = 1
 
             for actual_date in actual_dates:
                 if starting_date is None:  # Start a new trip
@@ -156,7 +156,7 @@ class DataSimulator:
 
                         else:
                             
-                            if actual_date > starting_date + timedelta(days=self.max_trip_days):
+                            if actual_date > starting_date + timedelta(days=self.min_trip_days):
                                 is_lost = 1  # Mark as lost after max_trip_days if not recollected
 
                         if day_trip is not None:
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     simulator = DataSimulator(
         num_containers=1000,
         days=100,
-        max_trip_days=40,
+        min_trip_days=40,
     )
     df = simulator.simulate_container_data()
     #df.to_excel("./data/survival_data.xlsx", index=False)

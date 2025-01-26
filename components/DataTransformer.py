@@ -60,13 +60,14 @@ class DataTransformer:
 
 
         groupby_trip_all = self.df.groupby(["ContainerID", "TripID"])
+        groupby_trip_all = self.df.groupby(["ContainerID", "TripID"])
         day_trip_all = groupby_trip_all["DayTrip"].max()
 
 
-        #print (f"type day_trip_max:{type(day_trip_max_not_lost)}")
-        #print (f"type day_trip_max:{day_trip_max_not_lost}")
-        #day_trip_all.to_excel("./data/day_trip_max.xlsx", index=False)
-        threshold = math_functions.calculate_upper_bound(day_trip_all)
+        #median_trip = groupby_trip_all["DayTrip"].median().reset_index(name="Median")
+        #percentile_25 = groupby_trip_all["DayTrip"].quantile(0.25).reset_index(name="Percentile_25")
+        #percentile_75 = groupby_trip_all["DayTrip"].quantile(0.75).reset_index(name="Percentile_75")
+
 
         # Calculate average and variance of DayTrip
         avg_days_trip_not_lost = day_trip_max_not_lost.mean()
@@ -82,7 +83,6 @@ class DataTransformer:
             "Trip F1 Score:  user treshold":dictionary_metrics.get("F1_Score_threshold"),
             "Average Days in Trip (Not Lost)": [avg_days_trip_not_lost],
             "Variance of Days in Trip (Not Lost)": [var_days_trip_not_lost],
-            "Recommended Threshold": [threshold]
         })
 
         return summary , day_trip_all

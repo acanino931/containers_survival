@@ -5,7 +5,17 @@ st.set_page_config(
     page_title="IFCO Data science Challenge App",
     page_icon="📦",
     layout="centered",  # Center all content on the main page
+    initial_sidebar_state="collapsed",
+    menu_items=None
 )
+# disable sidebar
+st.markdown("""
+    <style>
+        section[data-testid="stSidebar"][aria-expanded="true"]{
+            display: none;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 # App Title
 st.title("Welcome to the IFCO Data science challenge App")

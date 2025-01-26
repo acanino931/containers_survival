@@ -40,16 +40,19 @@ def run_data_generation(scenario=1):
     **Adjust the parameters below to simulate data:**
     """)
     num_containers = st.number_input("Number of Containers", min_value=1, value=1000, step=1)
+    st.session_state.num_containers = num_containers
     days = st.number_input("Number of Days", min_value=1, value=100, step=1)
-    max_trip_days = st.number_input("Max Trip Days", min_value=1, value=40, step=1)
+    st.session_state.days = days
+    min_trip_days = st.number_input("Minimum Days for a Trip", min_value=1, value=20, step=1)
     perc_trips_observed = 1.0  # Default for Scenario 1
 
     if scenario == 2:
         perc_trips_observed = st.slider("Insert the Percentage of Observable Trips", min_value=0.1, max_value=1.0, value=0.5, step=0.1)
 
     st.markdown("""
-    Setting a threshold of a reasonable maximum trip duration is important to avoid misclassifying containers that recently have gone out when the period
-    of observation ends. Those container will not be considered as lost even if the recollection date will be null.
+    Setting a threshold of a reasonable minimum trip duration is important to avoid misclassifying containers that recently have started a trip when the period
+    of observation ends. Those containers will not be considered as lost even if the recollection date will be null.
+    Is this value is too high the model would underestimate the probability of a container being lost.
     """)
 
     
@@ -63,7 +66,7 @@ def run_data_generation(scenario=1):
             simulator = DataSimulator(
                 num_containers=int(num_containers),
                 days=int(days),
-                max_trip_days=int(max_trip_days),
+                min_trip_days=int(min_trip_days),
                 scenario = scenario,
                 perc_trips_observed =perc_trips_observed
             )
@@ -76,7 +79,8 @@ def run_data_generation(scenario=1):
             summary_table, day_trip_all = st.session_state.transformer.create_summary_table(simulator.eval_metrics)
             st.session_state.summary_table = summary_table
             st.session_state.day_trip_all = day_trip_all
-            st.session_state.recommended_threshold = summary_table.loc[0, "Recommended Threshold"]
+            #st.session_state.recommended_threshold = summary_table.loc[0, "Recommended Threshold"]
+            st.session_state.perc_days_in_trip = summary_table.loc[0, "Percentage Days in Trip"]
 
             # Success message
             st.success("Data generation complete!")
@@ -142,6 +146,7 @@ def run_data_generation(scenario=1):
         st.markdown("""
             - **`Trip F1 Score: user threshold`**:  
             The F1 Score calculated at the **user-defined threshold**, balancing precision and recall.  
+            For calculating the recall since we cannot directly observe the exact moment of losing the container, false negatives are assumed to be 0.
             The formula for F1 Score is:
         """)
         st.latex(r"F1\ Score = 2 \times \frac{Precision \times Recall}{Precision + Recall}")
@@ -151,31 +156,21 @@ def run_data_generation(scenario=1):
 
             - **`Variance of Days in Trip (Not Lost)`**:  
             The variability (statistical variance) of the trip durations for containers that are **not classified as lost**.
-
-            - **`Recommended Threshold`**:  
-            A threshold calculated using the **Interquartile Range (IQR)** to identify outliers in the trip durations.  
-            The formulas used for the bounds are:
         """)
-        st.latex(r"Upper\ Bound = Q3 + 2.5 \times IQR")
-        st.markdown("""
-        The multiplier of 2.5 (instead of the conventional 1.5) is chosen to account for the **skewed nature** of the log-normal distribution, ensuring better classification of containers that are likely still in the cycle.
-        It is unuseful to consider a lower bound because we cannot directly observe the exact moment of losing the container.
-        """)
-        st.subheader("To optimize the threshold, input the optimized threshold value in the generate data section and click the generation button.")
+        st.subheader("To change the current threshold, input the new threshold value in the generate data section and click the generation button.")
 
 
         # Generate the threshold histogram
         if st.button("Generate Threshold Histogram"):
             fig = graph_maker.plot_histogram_with_thresholds(
                 st.session_state.day_trip_all,
-                user_threshold=max_trip_days,
-                recommended_threshold=st.session_state.recommended_threshold
+                user_threshold=min_trip_days,
             )
             st.plotly_chart(fig, use_container_width=True)
 
             st.markdown("""
-                        All the values to the right at the treshold would have been considered as "lost" according to the user threshold.
-                        Nevertheless the values used for training the model are corrected for having a better performance.
+                        The previous metrics about the False positve determined by the user threshold will not impact the performance of the model.
+                        The values used for training the model are corrected for having a better performance.
                         In other words the value of all the False posivives FP (Containers that are incorrectly classified as lost) are updated and considered as not-lost in the training set.
                         """)
             st.subheader("To continue access the launch the model page, from the navigator on the top of this page.")

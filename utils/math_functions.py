@@ -33,7 +33,7 @@ def get_lognorm_distribution(mean= 3.5 , sigma = 0.3 ):
     })
     return data
 
-def get_lognorm_PDF(df, duration, scaling_factor = 5):
+def get_lognorm_PDF(df, duration, scaling_factor = 1):
     """
     Returns the Probability Density Function (PDF) value for a given duration by looking up a DataFrame.
     If the duration does not exist in the DataFrame, it finds the closest duration value.
@@ -61,11 +61,11 @@ def get_lognorm_PDF(df, duration, scaling_factor = 5):
 #print (res)
 
 
-def calculate_upper_bound(series , k = 3):
+def calculate_upper_bound(series , k = 1.5):
     """
     Calculates the upper bound for detecting outliers using the Interquartile Range (IQR).
     Used because it is a robust measure.
-    the k parameter it's setted to 3 instead of the default Tukey value 1,5 beacuse of the skewness of the log normal distribution
+    the k parameter can be setted up to 3 instead of the default Tukey value 1,5 if we want to consider of the skewness of the log normal distribution
 
     Parameters:
         data (pd.DataFrame): The input DataFrame.
@@ -83,6 +83,8 @@ def calculate_upper_bound(series , k = 3):
 
     # Calculate the upper bound
     upper_bound = Q3 + k * IQR
+    # uodated with lower
+    #upper_bound =  Q1 - k * IQR
 
     return round(upper_bound)
 
