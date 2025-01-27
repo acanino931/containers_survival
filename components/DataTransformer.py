@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from utils import math_functions
+
 
 class DataTransformer:
     """
@@ -54,10 +54,6 @@ class DataTransformer:
         perc_days_in_trip = days_in_trip / total_rows
 
 
-        # Group by ContainerID and TripID and calculate metrics
-        #groupby_trip_not_lost = self.df[self.df["RecollectingDate"].notnull()].groupby(["ContainerID", "TripID"])
-        #day_trip_max_not_lost = groupby_trip_not_lost["DayTrip"].max()
-
 
 
         groupby_trip_all = self.df.groupby(["ContainerID", "TripID"])
@@ -66,17 +62,11 @@ class DataTransformer:
 
         #median_trip = groupby_trip_all["DayTrip"].median().reset_index(name="Median")
         median_trip = day_trip_all.median()
-        
-        #percentile_25 = groupby_trip_all["DayTrip"].quantile(0.25).reset_index(name="Percentile_25")
-        #percentile_75 = groupby_trip_all["DayTrip"].quantile(0.75).reset_index(name="Percentile_75")
-
 
         # Calculate average and variance of DayTrip
         avg_days_trip = day_trip_all.mean()
         var_days_trip = day_trip_all.var()
 
-        # Calculate the exponential threshold
-        #threshold = math_functions.calculate_exponential_threshold(day_trip_max)
 
 
         summary = pd.DataFrame({
@@ -90,30 +80,6 @@ class DataTransformer:
         return summary , day_trip_all
     
 
-        #self.model_data = result
-        #result.to_excel("./data/model_data.xlsx", index=False)
 
-        #return result
-    
 
     
-
-# if __name__ == "__main__":
-#     # Sample DataFrame
-#     df = pd.read_excel("./data/survival_data.xlsx")
-
-#     # Initialize the DataTransformer
-#     transformer = DataTransformer(df)
-
-#     # Reassign lost values
-#     #transformer.reassign_lost_value()
-
-#     # Create summary table
-#     summary_table = transformer.create_summary_table()
-
-#     # Display the transformed DataFrame
-#     #print("Transformed DataFrame:")
-#     #print(transformer.get_dataframe())
-
-#     print("\nSummary Table:")
-#     print(summary_table)

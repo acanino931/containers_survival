@@ -132,35 +132,28 @@ def launch_the_model():
         if st.session_state.shrinking_rate is None:
             st.warning("Please generate Kaplan-Meier Curve first. Shrinking_rate missing")
             return
-        #median_trip_time = st.session_state.median_trip_time
+
         shrinking_rate = st.session_state.shrinking_rate
-        print(f"shrinking rate: {shrinking_rate}")
+
 
         # we are assuming that the risk it's equally distributed for all the period.
         adjusted_shrinking_rate =  shrinking_rate/ final_days * perc_days_in_trip
-        #mapped_survival_adjusted = st.session_state.mapped_survival.copy()
+
 
         df_remaining_containers = calculate_available_containers(final_containers, days , adjusted_shrinking_rate  )
-        df_remaining_containers.to_excel("./data/df_remaining_containers.xlsx", index=False)
 
-        #  calculating the risk of losing a containerfor each moment # KM_estimate 
-        #mapped_survival_adjusted['Hazard'] =  1 - mapped_survival_adjusted['KM_estimate'] * perc_days_in_trip
 
-        #mapped_survival_adjusted['Containers'] = final_containers - final_containers * mapped_survival_adjusted['Hazard']
-
-        #mapped_survival_adjusted= mapped_survival_adjusted[['Containers']]
 
         st.markdown("""
         The following graph represent the estimated number of available containers over time:
         """)
         fig = plot_available_containers(df_remaining_containers, final_days)
         st.plotly_chart(fig, use_container_width=True)
-        #print(df_remaining_containers.tail(5))
 
-        #final_estimate = df_remaining_containers.loc[final_days, 'Containers']
+
         filtered_row = df_remaining_containers[df_remaining_containers['Day'] == final_days]
 
-        # Check if the filtered row exists and extract the value from the 'Containers' column
+
         if not filtered_row.empty:
             final_estimate = filtered_row['Containers'].iloc[0]
         else:

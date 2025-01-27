@@ -201,16 +201,6 @@ class DataSimulator:
     
 
 
-if __name__ == "__main__":
-    simulator = DataSimulator(
-        num_containers=1000,
-        days=100,
-        min_trip_days=40,
-    )
-    df = simulator.simulate_container_data()
-    #df.to_excel("./data/survival_data.xlsx", index=False)
-    #df.to_csv("./data/survival_data.csv", index=False)
-
 
 #
 

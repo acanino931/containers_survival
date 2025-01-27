@@ -173,9 +173,3 @@ def run_data_generation(scenario=1):
                         """)
             st.subheader("To continue access the launch the model page, from the navigator on the top of this page.")
 
-    # # Use the transformer for the second button
-    # if st.button("Launch the Kaplan Meier model"):
-    #     if "transformer" in st.session_state:
-    #         a = st.session_state.transformer.prepare_data_for_kaplan_meier()
-    #     else:
-    #         st.warning("Please generate data first.")
