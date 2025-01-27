@@ -45,7 +45,7 @@ def launch_the_model():
         To answer this question, we use the Kaplan-Meier survival curve to estimate the survival probabilities of containers over time.  
         The shrinking rate at any given moment is calculated as:
     """)
-    st.latex(r"Shrinking\ Rate = 1 - S(t)")
+    st.latex(r"Shrinking\ Ratio = 1 - S(t_{\text{median}})")
 
     st.markdown("""
         where \(S(t)\) is the survival probability at a given time \(t\).  
@@ -93,7 +93,7 @@ def launch_the_model():
     - Let \(P_{trip}\) represent the **probability of being in a trip**, assumed to be constant across the interval.
     - Let \(N_{initial}\) be the **total number of initial containers**.
 
-     we instead assume the shrinking risk, \(H\), to be **constant over the interval**. This simplifies the calculation while accounting for overlapping trips.
+     we instead assume the shrinking rate, \(H\), to be **constant over the interval**. This simplifies the calculation while accounting for overlapping trips.
 
     """)
 
@@ -102,7 +102,7 @@ def launch_the_model():
     """)
 
     st.markdown("""
-    To calculate \( H \), the **shrinking hazard**, we divide the total shrinking rate over the time interval \( [t_{min}, t_{max}] \) by the length of the interval.
+    To calculate \( H \), the **shrinking hazard**, we divide the total shrinking rate S over the time interval \( [t_{min}, t_{max}] \) by the length of the interval.
 
     ### Definition of \( H \)
     - Let \( S \) be the mean shrinking rate derived from survival analysis in the previous point.
@@ -116,8 +116,8 @@ def launch_the_model():
     """)
 
     st.markdown("""
-    Since multiple trips can happen within the same time span, and the survival function used earlier estimates shrinking risk for individual trips,
-                this formula assumes that the shrinking risk is distributed evenly across the interval, as it accounts for the fact that multiple trips can occur within the same time span. By normalizing \( S \) over the interval length, we obtain a constant \( H \) for use in our calculations.
+    Since multiple trips can happen within the same time span, we are using assuming that the risk it's a constant value for each day in the time span,
+                this formula assumes that the shrinking rate is distributed evenly across the interval, as it accounts for the fact that multiple trips can occur within the same time span. By normalizing \( S \) over the interval length, we obtain a constant \( H \) for use in our calculations.
     """)
 
 

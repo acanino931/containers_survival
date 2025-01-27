@@ -2,6 +2,61 @@
 This project in streamlit app composed by 3 modules, the data generation part for scenario 1 and 2 and the modeling part.
 In order to navigate the project remember to use the navigator on the top of the main page.
 
+# Summary and business explanation
+To get a functional summary of the tool by feature, download the PowerPoint presentation ( Data_science_challenge) available in the project folder
+
+
+### Setting Up Without the Makefile
+
+If you choose not to use the `Makefile`, you can manually set up the environment and run the application by following these steps:
+
+---
+
+#### **1. Create a Virtual Environment**
+To create a virtual environment:
+```bash
+python -m venv venv
+```
+
+#### **activate it **
+If the system is On Linux/MacOS:
+```bash
+source venv/bin/activate
+```
+for windows:
+```bash
+.\venv\Scripts\activate
+```
+
+
+#### **2. Install Dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+#### **3. Run the app**
+in the root folder type that comand:
+```bash
+streamlit run app.py
+```
+---
+
+Once activated the virtual environment here an alternative to install dependencies and running the app using the setup file: 
+
+#### **1. Install Dependencies**
+in the root folder type that comand:
+```bash
+python setup.py install
+```
+
+#### **2. Run the app**
+in the root folder type that comand:
+```bash
+start-app
+```
+
+
 
 # Instructions for Using the Makefile
 
@@ -49,14 +104,15 @@ make freeze
 
 ### 6. Work flow order 
 
-make venv
-make install
-make run
-make clean
-make freeze
+- make venv
+- make install
+- make run
+- make clean
+- make freeze
 
-### 7. Navigating the App
+---
+###  Navigating the App
 
-Begin with the data generation part inserting the parameters.
-Control the main metrics of the generated data. 
-Navigate to the "launch the model" section to calculate the shrinking risk and the estimation of the availables containers in time.
+- Begin with the data generation part inserting the parameters. 
+- Check the data and the main metrics. 
+- Navigate to the "launch the model" section to calculate the shrinking risk and the estimation of the availables containers in time.
