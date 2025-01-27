@@ -59,4 +59,4 @@ make freeze
 
 Begin with the data generation part inserting the parameters.
 Control the main metrics of the generated data. 
-Navigate to the "launch the model" section to calculate the shrinking risk and the estimation of the availables containers in time.
+Navigate to the "launch the model" section to calculate the shrinking risk and the estimation of the availables containers in time. 
