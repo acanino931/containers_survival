@@ -18,7 +18,7 @@ To create a virtual environment:
 python -m venv venv
 ```
 
-#### **activate it **
+#### **2. Activate it**
 If the system is On Linux/MacOS:
 ```bash
 source venv/bin/activate
@@ -29,13 +29,13 @@ for windows:
 ```
 
 
-#### **2. Install Dependencies**
+#### **3. Install Dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-#### **3. Run the app**
+#### **4. Run the app**
 in the root folder type that comand:
 ```bash
 streamlit run app.py
@@ -48,12 +48,6 @@ Once activated the virtual environment here an alternative to install dependenci
 in the root folder type that comand:
 ```bash
 python setup.py install
-```
-
-#### **2. Run the app**
-in the root folder type that comand:
-```bash
-start-app
 ```
 
 

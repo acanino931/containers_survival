@@ -14,7 +14,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'start-app = app:main',  # Adjust for your entry point if needed
+            'start-app = app:app.py',  
         ],
     },
 )
