@@ -55,23 +55,25 @@ class DataTransformer:
 
 
         # Group by ContainerID and TripID and calculate metrics
-        groupby_trip_not_lost = self.df[self.df["RecollectingDate"].notnull()].groupby(["ContainerID", "TripID"])
-        day_trip_max_not_lost = groupby_trip_not_lost["DayTrip"].max()
+        #groupby_trip_not_lost = self.df[self.df["RecollectingDate"].notnull()].groupby(["ContainerID", "TripID"])
+        #day_trip_max_not_lost = groupby_trip_not_lost["DayTrip"].max()
 
 
-        groupby_trip_all = self.df.groupby(["ContainerID", "TripID"])
+
         groupby_trip_all = self.df.groupby(["ContainerID", "TripID"])
         day_trip_all = groupby_trip_all["DayTrip"].max()
 
 
         #median_trip = groupby_trip_all["DayTrip"].median().reset_index(name="Median")
+        median_trip = day_trip_all.median()
+        
         #percentile_25 = groupby_trip_all["DayTrip"].quantile(0.25).reset_index(name="Percentile_25")
         #percentile_75 = groupby_trip_all["DayTrip"].quantile(0.75).reset_index(name="Percentile_75")
 
 
         # Calculate average and variance of DayTrip
-        avg_days_trip_not_lost = day_trip_max_not_lost.mean()
-        var_days_trip_not_lost = day_trip_max_not_lost.var()
+        avg_days_trip = day_trip_all.mean()
+        var_days_trip = day_trip_all.var()
 
         # Calculate the exponential threshold
         #threshold = math_functions.calculate_exponential_threshold(day_trip_max)
@@ -80,9 +82,9 @@ class DataTransformer:
         summary = pd.DataFrame({
             "Percentage Days in Trip": [perc_days_in_trip],
             "Trip Precision user treshold":dictionary_metrics.get("precision_treshold"),
-            "Trip F1 Score:  user treshold":dictionary_metrics.get("F1_Score_threshold"),
-            "Average Days in Trip (Not Lost)": [avg_days_trip_not_lost],
-            "Variance of Days in Trip (Not Lost)": [var_days_trip_not_lost],
+            "Median trip duration":median_trip,
+            "Average trip duration": [avg_days_trip],
+            "Variance trip duration": [var_days_trip],
         })
 
         return summary , day_trip_all

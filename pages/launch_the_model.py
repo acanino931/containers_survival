@@ -1,6 +1,7 @@
 import streamlit as st
 from components.Modeler import Modeler
 from utils.graph_maker import plot_mapped_survival, plot_available_containers
+from utils.math_functions import calculate_available_containers
 
 def launch_the_model():
     st.title("Launch the Model")
@@ -18,6 +19,12 @@ def launch_the_model():
     if "mapped_survival" not in st.session_state:
         st.session_state.mapped_survival = None  # Initialize to None
 
+    if "shrinking_rate" not in st.session_state:
+        st.session_state.shrinking_rate = None  # Initialize to None
+
+    if "median_trip_time" not in st.session_state:
+        st.session_state.median_trip_time = None
+
     # Load session data
     df = st.session_state.df
     num_containers = st.session_state.num_containers
@@ -26,6 +33,7 @@ def launch_the_model():
 
     # Initialize the Modeler class
     modeler = Modeler(df, prob_in_trip=perc_days_in_trip)
+    st.session_state.median_trip_time = modeler.median_trip_time
 
     # Display preprocessed data
     st.subheader("Preprocessed Data")
@@ -67,7 +75,9 @@ def launch_the_model():
         mapped_survival = modeler.mapped_survival_function()
         median_hazard = modeler.get_km_estimate_at_timeline(mapped_survival)
         shrinking_rate = 1 - median_hazard
+        st.session_state.shrinking_rate = shrinking_rate
         st.session_state.mapped_survival = mapped_survival
+        
 
         fig = plot_mapped_survival(mapped_survival , modeler.median_trip_time)
         st.plotly_chart(fig, use_container_width=True)
@@ -79,15 +89,38 @@ def launch_the_model():
     st.markdown("""
     To estimate the number of available containers at any given time, we calculate:
 
-    - Let \(P_{trip}(t)\) be the probability of being in a trip over time.
-    - Let \(1 - S(t)\) represent the shrinking rate derived from survival analysis, where \(S(t)\) is the survival probability.
-    - Let \(N_{initial}\) be the total number of initial containers.
+    - Let \(H\) represent the **constant shrinking hazard** derived from survival analysis, averaged over the requested time interval \(t_{min}\) to \(t_{max}\).
+    - Let \(P_{trip}\) represent the **probability of being in a trip**, assumed to be constant across the interval.
+    - Let \(N_{initial}\) be the **total number of initial containers**.
 
-    Combining these, the number of available containers over time, \(N_{available}(t)\), is calculated as:
+     we instead assume the shrinking risk, \(H\), to be **constant over the interval**. This simplifies the calculation while accounting for overlapping trips.
+
     """)
+
     st.latex(r"""
-    N_{available}(t) = N_{initial} \cdot P_{trip}(t) \cdot  (1 - S(t)))
+        N_{available}(t) = N_{available}(t) - N_{available}(t) \cdot H \cdot P_{trip}
     """)
+
+    st.markdown("""
+    To calculate \( H \), the **shrinking hazard**, we divide the total shrinking rate over the time interval \( [t_{min}, t_{max}] \) by the length of the interval.
+
+    ### Definition of \( H \)
+    - Let \( S \) be the mean shrinking rate derived from survival analysis in the previous point.
+    - Let \( t_{min} \) and \( t_{max} \) represent the start and end of the time interval.
+
+    The shrinking risk per unit time, \( H \), is calculated as:
+    """)
+
+    st.latex(r"""
+        H = \frac{S}{t_{max} - t_{min}}
+    """)
+
+    st.markdown("""
+    Since multiple trips can happen within the same time span, and the survival function used earlier estimates shrinking risk for individual trips,
+                this formula assumes that the shrinking risk is distributed evenly across the interval, as it accounts for the fact that multiple trips can occur within the same time span. By normalizing \( S \) over the interval length, we obtain a constant \( H \) for use in our calculations.
+    """)
+
+
     final_containers = st.number_input("Initial Number of Containers", min_value=1, value=int(num_containers), step=1)
     final_days = st.number_input("Observation Time", min_value=1, value=int(days), step=1)
 
@@ -95,26 +128,51 @@ def launch_the_model():
 
     if st.button("Estimate Available Containers"):
 
-        if st.session_state.mapped_survival is None:
-            st.warning("Please generate Kaplan-Meier Curve first.")
+
+        if st.session_state.shrinking_rate is None:
+            st.warning("Please generate Kaplan-Meier Curve first. Shrinking_rate missing")
             return
-        mapped_survival_adjusted = st.session_state.mapped_survival.copy()
+        #median_trip_time = st.session_state.median_trip_time
+        shrinking_rate = st.session_state.shrinking_rate
+        print(f"shrinking rate: {shrinking_rate}")
+
+        # we are assuming that the risk it's equally distributed for all the period.
+        adjusted_shrinking_rate =  shrinking_rate/ final_days * perc_days_in_trip
+        #mapped_survival_adjusted = st.session_state.mapped_survival.copy()
+
+        df_remaining_containers = calculate_available_containers(final_containers, days , adjusted_shrinking_rate  )
+        df_remaining_containers.to_excel("./data/df_remaining_containers.xlsx", index=False)
+
         #  calculating the risk of losing a containerfor each moment # KM_estimate 
-        mapped_survival_adjusted['Hazard'] =  1 - mapped_survival_adjusted['KM_estimate'] * perc_days_in_trip
+        #mapped_survival_adjusted['Hazard'] =  1 - mapped_survival_adjusted['KM_estimate'] * perc_days_in_trip
 
-        mapped_survival_adjusted['Containers'] = final_containers - final_containers * mapped_survival_adjusted['Hazard']
+        #mapped_survival_adjusted['Containers'] = final_containers - final_containers * mapped_survival_adjusted['Hazard']
 
-        mapped_survival_adjusted= mapped_survival_adjusted[['Containers']]
+        #mapped_survival_adjusted= mapped_survival_adjusted[['Containers']]
 
         st.markdown("""
         The following graph represent the estimated number of available containers over time:
         """)
-        fig = plot_available_containers(mapped_survival_adjusted, final_days)
+        fig = plot_available_containers(df_remaining_containers, final_days)
         st.plotly_chart(fig, use_container_width=True)
+        #print(df_remaining_containers.tail(5))
 
-        final_estimate = mapped_survival_adjusted.loc[final_days, 'Containers']
-        print ( final_estimate)
+        #final_estimate = df_remaining_containers.loc[final_days, 'Containers']
+        filtered_row = df_remaining_containers[df_remaining_containers['Day'] == final_days]
+
+        # Check if the filtered row exists and extract the value from the 'Containers' column
+        if not filtered_row.empty:
+            final_estimate = filtered_row['Containers'].iloc[0]
+        else:
+            st.error(f"Day {final_days} is not in the DataFrame.")
+            final_estimate = None
+        
 
         st.subheader(f"The estimated number of containers for the given time is: {round(final_estimate)}")
+
+        st.markdown("""
+        NOTE: In case you want to generate a new prediction after modifying the initial data generation parameters or the scenario,
+                     please click once again the Generate Kaplan-Meier Curve to be sure of the updated results.
+        """)
 
         

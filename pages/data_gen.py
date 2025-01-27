@@ -51,8 +51,8 @@ def run_data_generation(scenario=1):
 
     st.markdown("""
     Setting a threshold of a reasonable minimum trip duration is important to avoid misclassifying containers that recently have started a trip when the period
-    of observation ends. Those containers will not be considered as lost even if the recollection date will be null.
-    Is this value is too high the model would underestimate the probability of a container being lost.
+    of observation ends.\n Those containers will not be considered as lost even if the recollection date will be null.\n
+    If the threshold value is too high the model would underestimate the probability of a container being lost.
     """)
 
     
@@ -76,7 +76,9 @@ def run_data_generation(scenario=1):
 
             # Transform the data and store summary results in session_state
             st.session_state.transformer = DataTransformer(st.session_state.df)
+
             summary_table, day_trip_all = st.session_state.transformer.create_summary_table(simulator.eval_metrics)
+
             st.session_state.summary_table = summary_table
             st.session_state.day_trip_all = day_trip_all
             #st.session_state.recommended_threshold = summary_table.loc[0, "Recommended Threshold"]
@@ -139,26 +141,22 @@ def run_data_generation(scenario=1):
             The percentage of days containers are actively in a trip compared to the total days considered in the simulation.
 
             - **`Trip Precision user threshold`**:  
-            Precision value calculated at the **user-defined threshold** for classifying containers as "lost".  
+            Precision value initially calculated at the **user-defined threshold** for classifying containers as "lost".  
+            This field is meant to give more information to the user over the possible rate of false negative according to the threshold chosen.
             The formula for precision is:
         """)
         st.latex(r"Precision = \frac{True\ Positives}{True\ Positives + False\ Positives}")
         st.markdown("""
-            - **`Trip F1 Score: user threshold`**:  
-            The F1 Score calculated at the **user-defined threshold**, balancing precision and recall.  
-            For calculating the recall since we cannot directly observe the exact moment of losing the container, false negatives are assumed to be 0.
-            The formula for F1 Score is:
-        """)
-        st.latex(r"F1\ Score = 2 \times \frac{Precision \times Recall}{Precision + Recall}")
-        st.markdown("""
-            - **`Average Days in Trip (Not Lost)`**:  
-            The average number of days containers stay in a trip **without being classified as lost**.
+            - **`Median trip duration`**:  
+            Median value of the trip duration distribution in days.
 
-            - **`Variance of Days in Trip (Not Lost)`**:  
-            The variability (statistical variance) of the trip durations for containers that are **not classified as lost**.
+            - **`Average trip duration`**:  
+            Average of the trip duration distribution in days.
+
+            - **`Variance trip duration `**:  
+            Varianceof the trip duration distribution in days.
         """)
         st.subheader("To change the current threshold, input the new threshold value in the generate data section and click the generation button.")
-
 
         # Generate the threshold histogram
         if st.button("Generate Threshold Histogram"):

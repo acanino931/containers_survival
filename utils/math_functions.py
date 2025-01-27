@@ -124,4 +124,31 @@ def calculate_adjusted_params(perc_trips_observed, mu, sigma):
 
     return adjusted_mu, adjusted_sigma
 
+import pandas as pd
 
+def calculate_available_containers(initial_containers, days, probability):
+    """
+    Calculate the available containers over a number of days based on the given probability.
+
+    Parameters:
+    initial_containers (int): The initial number of containers.
+    days (int): The number of days to calculate for.
+    probability (float): The fixed risk factor (0 ≤ probability ≤ 1).
+
+    Returns:
+    pd.DataFrame: A DataFrame with day-by-day calculations of available containers.
+    """
+    # Create a DataFrame to store results
+    df = pd.DataFrame({'Day': range(1, days + 1)})
+    df['Containers'] = 0  # Initialize the column for available containers
+
+    # Set the initial number of containers
+    current_containers = initial_containers
+
+    # Calculate N_available for each day
+    for i in range(days):
+        current_containers -= current_containers * probability
+        current_containers = max(0, current_containers)  # Prevent negative values
+        df.iloc[i, df.columns.get_loc('Containers')] = current_containers
+
+    return df
