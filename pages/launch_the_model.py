@@ -137,7 +137,7 @@ def launch_the_model():
 
 
         # we are assuming that the risk it's equally distributed for all the period.
-        adjusted_shrinking_rate =  shrinking_rate/ final_days * perc_days_in_trip
+        adjusted_shrinking_rate =  shrinking_rate/ days * perc_days_in_trip
 
 
         df_remaining_containers = calculate_available_containers(final_containers, days , adjusted_shrinking_rate  )
